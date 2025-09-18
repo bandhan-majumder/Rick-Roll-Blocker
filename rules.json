@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/blocked.html"
+      }
+    },
+    "condition": {
+      "urlFilter": "https://www.youtube.com/watch?v=dQw4w9WgXcQ*",
+      "resourceTypes": ["main_frame"]
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/blocked.html"
+      }
+    },
+    "condition": {
+      "urlFilter": "*youtube.com/watch*dQw4w9WgXcQ*",
+      "resourceTypes": ["main_frame"]
+    }
+  }
+]

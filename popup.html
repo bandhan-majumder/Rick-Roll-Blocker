@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rick Roll Blocker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            width: 320px;
+            min-height: 240px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+            line-height: 1.5;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .shield {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .toggle-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .toggle-label {
+            font-weight: 500;
+            color: #4a5568;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #cbd5e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .toggle.active {
+            background: #48bb78;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle.active .toggle-slider {
+            transform: translateX(24px);
+        }
+
+        .stats {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .stat-item:not(:last-child) {
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .stat-label {
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #1a202c;
+        }
+
+        .status-protected {
+            color: #38a169;
+        }
+
+        .status-disabled {
+            color: #e53e3e;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reset-btn {
+            background: #ffffff;
+            border: 1px solid #d1d5db;
+            color: #4a5568;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .reset-btn:hover {
+            background: #f7fafc;
+            border-color: #a0aec0;
+        }
+
+        .reset-btn:active {
+            transform: translateY(1px);
+        }
+
+        .version {
+            font-size: 0.75rem;
+            color: #a0aec0;
+        }
+
+        .footer-text {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #718096;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="shield">🛡️</div>
+            <h1>Rick Roll Blocker</h1>
+        </div>
+
+        <div class="toggle-section">
+            <span class="toggle-label">Protection Status</span>
+            <div class="toggle active" id="protectionToggle">
+                <div class="toggle-slider"></div>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-label">Rick Rolls Blocked</span>
+                <span class="stat-value" id="blockCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Status</span>
+                <span class="stat-value status-protected" id="statusText">Protected</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Last Block</span>
+                <span class="stat-value" id="lastBlock">Never</span>
+            </div>
+        </div>
+
+        <div class="footer">
+            <button class="reset-btn" id="resetBtn">Reset Counter</button>
+            <span class="version">v1.0</span>
+        </div>
+
+        <div class="footer-text">
+            Stay protected from Rick Rolls
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggle = document.getElementById('protectionToggle');
+            const statusText = document.getElementById('statusText');
+            const blockCountElement = document.getElementById('blockCount');
+            const lastBlockElement = document.getElementById('lastBlock');
+            const resetBtn = document.getElementById('resetBtn');
+
+            function loadData() {
+                const blockCount = parseInt(localStorage.getItem('rickrollBlocks') || '0', 10);
+                const lastBlock = localStorage.getItem('lastRickrollBlock') || 'Never';
+                const isEnabled = localStorage.getItem('rickrollEnabled') !== 'false';
+
+                blockCountElement.textContent = blockCount;
+                lastBlockElement.textContent = lastBlock === 'Never' ? 'Never' : formatDate(lastBlock);
+
+                updateToggleState(isEnabled);
+            }
+
+            function formatDate(dateString) {
+                if (!dateString || dateString === 'Never') return 'Never';
+                
+                try {
+                    const date = new Date(dateString);
+                    const now = new Date();
+                    const diffMs = now - date;
+                    const diffMins = Math.floor(diffMs / (1000 * 60));
+                    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+                    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+                    if (diffMins < 1) return 'Just now';
+                    if (diffMins < 60) return `${diffMins}m ago`;
+                    if (diffHours < 24) return `${diffHours}h ago`;
+                    if (diffDays < 7) return `${diffDays}d ago`;
+                    
+                    return date.toLocaleDateString();
+                } catch (e) {
+                    return 'Recently';
+                }
+            }
+
+            function updateToggleState(isEnabled) {
+                if (isEnabled) {
+                    toggle.classList.add('active');
+                    statusText.textContent = 'Protected';
+                    statusText.className = 'stat-value status-protected';
+                } else {
+                    toggle.classList.remove('active');
+                    statusText.textContent = 'Disabled';
+                    statusText.className = 'stat-value status-disabled';
+                }
+            }
+
+            toggle.addEventListener('click', function() {
+                const newState = !toggle.classList.contains('active');
+                
+                updateToggleState(newState);
+                localStorage.setItem('rickrollEnabled', newState ? 'true' : 'false');
+
+                if (typeof chrome !== 'undefined' && chrome.tabs) {
+                    chrome.tabs.query({}, function(tabs) {
+                        tabs.forEach(function(tab) {
+                            if (chrome.tabs.sendMessage) {
+                                chrome.tabs.sendMessage(tab.id, {
+                                    action: 'toggleProtection',
+                                    enabled: newState
+                                }).catch(() => {});
+                            }
+                        });
+                    });
+                }
+            });
+
+            resetBtn.addEventListener('click', function() {
+                localStorage.setItem('rickrollBlocks', '0');
+                localStorage.removeItem('lastRickrollBlock');
+                
+                blockCountElement.textContent = '0';
+                lastBlockElement.textContent = 'Never';
+
+                resetBtn.textContent = 'Reset!';
+                resetBtn.style.background = '#e6fffa';
+                resetBtn.style.color = '#38a169';
+                
+                setTimeout(() => {
+                    resetBtn.textContent = 'Reset Counter';
+                    resetBtn.style.background = '#ffffff';
+                    resetBtn.style.color = '#4a5568';
+                }, 1000);
+            });
+
+            if (typeof chrome !== 'undefined' && chrome.runtime) {
+                chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+                    if (request.action === 'updateStats') {
+                        loadData();
+                        sendResponse({success: true});
+                    }
+                });
+            }
+
+            loadData();
+
+            const refreshInterval = setInterval(loadData, 2000);
+
+            window.addEventListener('beforeunload', () => {
+                clearInterval(refreshInterval);
+            });
+        });
+    </script>
+</body>
+</html>
